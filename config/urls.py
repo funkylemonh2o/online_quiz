@@ -17,7 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from accounts.views import main_view
+from quiz.views import quiz_detail
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main_view, name='main_page'),
+    path("<int:pk>/", quiz_detail, name="quiz_detail"),
 ]
