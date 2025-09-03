@@ -1,19 +1,35 @@
+{% load static %}
+{% include 'head.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Home Page</title>
+    <style>
+        body {
+          background-image: url("{% static 'background.jpg' %}");
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
+        }
+        .white_table {
+        background-color: white;
+        border-radius: 10px;
+        display: inline-block;   /* shrink to fit the text */
+        padding: 8px 16px;       /* add spacing around text */
+        margin: 10px;            /* space around the box */
+            }
+
+    </style>
 </head>
 <body>
-<h1>Welcome to the Quizzer</h1>
-<h1>Available Quizzes</h1>
-<ul>
-  {% for quiz in quizzes %}
-    <li>
-      <a href="{% url 'quiz_detail' quiz.id %}">{{ quiz.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
+
+<h1 class="white_table">Welcome to the Quizzer</h1>
+<h1 class="white_table">Available Quizzes</h1>
+<br>
+
+<a href="{% url 'quizzes' %}">Go To Quizzes</a>
+
 
 </body>
 </html>

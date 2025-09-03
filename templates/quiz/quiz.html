@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ quiz.title }}</title>
+    <style>
+        .correct { background-color: #c8f7c5; font-weight: bold; border-radius: 3px; padding: 4px; }
+        .wrong { background-color: #f7c5c5; padding: 4px; }
+        .answer-label { display: inline-block; margin-bottom: 6px; border-radius: 3px; padding: 3px 6px; }
+    </style>
+</head>
+<body>
+
+<h1>{{ quiz.title }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {% for question in questions %}
+        <div>
+            <p>{{ question.text }}</p>
+            {% for answer in question.answers.all %}
+                {% comment %}
+                    Use the flags set in the view:
+                    - answer.is_correct  (from the model)
+                    - answer.is_user_selected (set in the view)
+                {% endcomment %}
+
+                <label class="answer-label
+                    {% if score is not None and answer.is_user_selected and answer.is_correct %} correct{% endif %}
+                    {% if score is not None and answer.is_user_selected and not answer.is_correct %} wrong{% endif %}
+                ">
+                    <input type="radio"
+                           name="question_{{ question.id }}"
+                           value="{{ answer.id }}"
+                           {% if answer.is_user_selected %}checked{% endif %}
+                           {% if score is not None %}disabled{% endif %}>
+                    {{ answer.text }}
+                </label><br>
+            {% endfor %}
+        </div>
+        <hr>
+    {% endfor %}
+
+    {% if score is None %}
+        <button type="submit">Submit</button>
+    {% endif %}
+</form>
+
+{% if score is not None %}
+    <h2>Your score: {{ score }} / {{ questions|length }}</h2>
+
+    <form method="get" action="{% url 'quiz' quiz.id %}">
+        <button type="submit">Restart</button>
+    </form>
+{% endif %}
+<a href="{% url 'main_page'%}">Home</a>
+</body>
+</html>

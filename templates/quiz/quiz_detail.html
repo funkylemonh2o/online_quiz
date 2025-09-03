@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+{% for quiz in quizzes %}
+
+    <h1>{{ quiz.title }}</h1>
+    <p>{{ quiz.description }}</p>
+    <a href="{% url 'quiz' quiz.id %}">Start</a>
+
+{% endfor %}
+
+</body>
+</html>
