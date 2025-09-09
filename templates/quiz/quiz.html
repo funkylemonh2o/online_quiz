@@ -7,24 +7,53 @@
         .correct { background-color: #c8f7c5; font-weight: bold; border-radius: 3px; padding: 4px; }
         .wrong { background-color: #f7c5c5; padding: 4px; }
         .answer-label { display: inline-block; margin-bottom: 6px; border-radius: 3px; padding: 3px 6px; }
+
+        /* Quiz flow styles */
+        .question {
+            position: relative;
+            padding: 20px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            z-index: 1;
+            display: none; /* all hidden at start */
+        }
+
+        .question::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            border-radius: 8px;
+            z-index: 2;
+            transition: opacity 0.6s ease;
+        }
+
+        .question.active::before {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .timer {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #finish-btn {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <h1>{{ quiz.title }}</h1>
 
-<form method="post">
+<form method="post" id="quiz-form">
     {% csrf_token %}
     {% for question in questions %}
-        <div>
+        <div class="question" data-timer="{{ question.timer }}">
             <p>{{ question.text }}</p>
             {% for answer in question.answers.all %}
-                {% comment %}
-                    Use the flags set in the view:
-                    - answer.is_correct  (from the model)
-                    - answer.is_user_selected (set in the view)
-                {% endcomment %}
-
                 <label class="answer-label
                     {% if score is not None and answer.is_user_selected and answer.is_correct %} correct{% endif %}
                     {% if score is not None and answer.is_user_selected and not answer.is_correct %} wrong{% endif %}
@@ -37,12 +66,17 @@
                     {{ answer.text }}
                 </label><br>
             {% endfor %}
+
+            {% if score is None %}
+                <p class="timer">Time left: <span class="time"></span>s</p>
+                <button type="button" class="next-btn">Next</button>
+            {% endif %}
         </div>
         <hr>
     {% endfor %}
 
     {% if score is None %}
-        <button type="submit">Submit</button>
+        <button type="submit" id="finish-btn">Finish</button>
     {% endif %}
 </form>
 
@@ -53,6 +87,64 @@
         <button type="submit">Restart</button>
     </form>
 {% endif %}
+
 <a href="{% url 'main_page'%}">Home</a>
+
+{% if score is None %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const questions = document.querySelectorAll(".question");
+    let currentIndex = 0;
+    let countdown;
+
+    function showQuestion(index) {
+        // Hide all
+        questions.forEach(q => {
+            q.style.display = "none";
+            q.classList.remove("active");
+        });
+
+        // Show current
+        const current = questions[index];
+        current.style.display = "block";
+        current.classList.add("active");
+
+        // Timer
+        const timeSpan = current.querySelector(".time");
+        let timeLeft = parseInt(current.dataset.timer);
+        timeSpan.textContent = timeLeft;
+
+        clearInterval(countdown);
+        countdown = setInterval(() => {
+            timeLeft--;
+            timeSpan.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                nextQuestion();
+            }
+        }, 1000);
+
+        // Next button
+        const btn = current.querySelector(".next-btn");
+        btn.onclick = nextQuestion;
+    }
+
+    function nextQuestion() {
+        questions[currentIndex].classList.remove("active");
+        currentIndex++;
+        if (currentIndex < questions.length) {
+            showQuestion(currentIndex);
+        } else {
+            document.getElementById("finish-btn").style.display = "block";
+        }
+    }
+
+    // Start first question
+    if (questions.length > 0) {
+        showQuestion(currentIndex);
+    }
+});
+</script>
+{% endif %}
 </body>
 </html>

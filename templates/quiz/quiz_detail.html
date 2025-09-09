@@ -1,18 +1,35 @@
+{% include "head.html" %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Quizzes</title>
 </head>
 <body>
+{% if user.is_authenticated %}
+    <a href="{% url 'logout'%}" onclick="return confirm('Ви впевнені, що хочете вийти?');">Вийти</a>
 
-{% for quiz in quizzes %}
+    <form method="get" action="{% url 'main_page' %}">
+        <label for="value">Search by:</label>
+        <select name="search_by" id="value">
+            <option value="title" {% if search_by == "title" %}selected{% endif %}>Title</option>
+            <option value="description" {% if search_by == "description" %}selected{% endif %}>Description</option>
+        </select>
 
-    <h1>{{ quiz.title }}</h1>
-    <p>{{ quiz.description }}</p>
-    <a href="{% url 'quiz' quiz.id %}">Start</a>
-
-{% endfor %}
-
+        <input type="text" name="search" placeholder="Search..." value="{{ query }}">
+        <button type="submit">Search</button>
+    </form>
+{% endif %}
+{% if quizzes %}
+    {% for quiz in quizzes %}
+        <h1>{{ quiz.title }}</h1>
+        <p>{{ quiz.description }}</p>
+        <a href="{% url 'quiz' quiz.id %}">Start</a>
+    {% endfor %}
+{% else %}
+    <p>No quizzes found.</p>
+{% endif %}
+<br><br>
+<a href="{% url 'main_page'%}">Home</a>
 </body>
 </html>

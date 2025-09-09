@@ -20,7 +20,7 @@ from django.urls import path
 from accounts.views import main_view
 from quiz.views import quiz_detail, quiz
 from django.conf.urls.static import static
-from accounts.views import logout_view, login_view, register_view
+from accounts.views import logout_view, login_view, register_view, create
 
 
 urlpatterns = [
@@ -28,6 +28,7 @@ urlpatterns = [
     path('', main_view, name='main_page'),
     path("quizzes", quiz_detail, name="quizzes"),
     path("<int:pk>/quiz", quiz, name="quiz"),
+    path('create/', create, name='create'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
