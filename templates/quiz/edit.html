@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit {{ quiz.title }}</title>
+    <script>
+        function showAnswerFields() {
+            let count = document.getElementById("answer_count").value;
+            let container = document.getElementById("answers_container");
+            container.innerHTML = "";
+            for (let i = 0; i < count; i++) {
+                container.innerHTML += `
+                    <div>
+                        <input type="text" name="answer_${i}" placeholder="Answer ${i+1}">
+                        <label>
+                            <input type="checkbox" name="correct_answers" value="${i}"> Correct
+                        </label>
+                    </div>`;
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>Edit Quiz: {{ quiz.title }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <label>Title:</label>
+    <input type="text" name="title" value="{{ quiz.title }}"><br>
+
+    <label>Description:</label>
+    <textarea name="description">{{ quiz.description }}</textarea><br>
+
+    <h2>Questions</h2>
+    {% for question in questions %}
+        <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            <p><b>{{ question.text }}</b> {% if question.multiple_choice %}(Multiple Choice){% endif %}</p>
+            <ul>
+                {% for answer in question.answers.all %}
+                    <li>
+                        {{ answer.text }}
+                        {% if answer.is_correct %}<strong>(Correct)</strong>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="delete_question" value="{{ question.id }}">
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+    {% empty %}
+        <p>No questions yet.</p>
+    {% endfor %}
+
+    <h2>Add New Question</h2>
+    <input type="text" name="new_question" placeholder="Question text"><br>
+
+    <label>
+        <input type="checkbox" name="multiple_choice"> Multiple Choice
+    </label><br>
+
+    <label>Number of answers (max 5):</label>
+    <input type="number" id="answer_count" name="answer_count" min="1" max="5" onchange="showAnswerFields()"><br>
+
+    <div id="answers_container"></div>
+
+    <button type="submit">Save Changes</button>
+</form>
+
+<a href="{% url 'quizzes' %}">Back to Quizzes</a>
+</body>
+</html>

@@ -56,5 +56,5 @@ def create(request):
             description=description,
         )
 
-        return redirect("main_page")  # go back to main page after creation
-    return redirect("main_page")
+        return redirect("quizzes")  # go back to main page after creation
+    return redirect("quizzes")
