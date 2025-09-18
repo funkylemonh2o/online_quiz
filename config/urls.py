@@ -18,10 +18,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path
 from accounts.views import main_view
-from quiz.views import quiz_detail, quiz, search_quizzes, edit
+from quiz.views import quiz_detail, quiz, search_quizzes, edit, delete_quiz
 from django.conf.urls.static import static
 from accounts.views import logout_view, login_view, register_view, create
-
 
 
 urlpatterns = [
@@ -34,6 +33,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('register/', register_view, name='register'),
     path('quizzes/<int:pk>/edit/', edit, name='edit'),
+    path("quizzes/<int:pk>/delete/", delete_quiz, name="delete_quiz"),
 ]
 
 if settings.DEBUG:
