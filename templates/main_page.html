@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
     <meta charset="UTF-8">
     <title>Home Page</title>
     <style>
@@ -20,17 +21,31 @@
         padding: 8px 16px;       /* add spacing around text */
         margin: 10px;            /* space around the box */
             }
+        a {
+          color: yellow;
+          background-color: purple;
+          font-weight: bold;
+          text-decoration: none;
+          padding: 14px 25px;
+          text-align: center;
+          border: 5px purple;
+          border-radius: 7px
 
+        }
+        a:hover {
+        background-color: darkorchid;
+        border: 5px darkslategrey;
+        }
     </style>
 </head>
 <body>
-
-<h1 class="white_table">Welcome to the Quizzer</h1>
-<h1 class="white_table">Available Quizzes</h1>
+<a href="{% url 'logout'%}" onclick="return confirm('Are you sure you want to log out?');" class="logout">Logout</a>
+<img src="static/create_a_logo_for_a_website_named_Quizzer_it_has_to_be_colorful-removebg-preview.png" class="center">
+<!---<h1 class="white_table">Available Quizzes</h1>-->
 <br>
-
-<a href="{% url 'quizzes' %}">Go To Quizzes</a>
-
-
+<br>
+<a href="{% url 'quizzes' %}" class="center">Go To Quizzes</a>
+<br>
+{% include 'footer.html' %}
 </body>
 </html>

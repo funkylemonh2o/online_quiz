@@ -1,0 +1,32 @@
+.center {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          width: 50%;
+          font-size: larger;
+        }
+.footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #f8f9fa;
+            border-top: 1px solid #ccc;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+.centerinside {
+display: flex;
+text-align: center;
+align-items: center;
+width: 50%;
+
+}
+.logout{
+color: white;
+background-color: red
+}

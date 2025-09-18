@@ -3,6 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit {{ quiz.title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        label { display: block; margin-top: 10px; }
+        input, textarea, select {
+            padding: 6px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px;
+        }
+        button, a {
+            background: purple; color: yellow; padding: 8px 14px;
+            border-radius: 5px; border: none; margin-top: 10px; cursor: pointer; text-decoration: none;
+        }
+        button:hover, a:hover { opacity: 0.9; }
+        .question-card {
+            border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 6px; background: #fff;
+        }
+    </style>
     <script>
         function showAnswerFields() {
             let count = document.getElementById("answer_count").value;
@@ -23,18 +38,19 @@
 <body>
 <h1>Edit Quiz: {{ quiz.title }}</h1>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <label>Title:</label>
-    <input type="text" name="title" value="{{ quiz.title }}"><br>
+    <input type="text" name="title" value="{{ quiz.title }}" required>
 
     <label>Description:</label>
-    <textarea name="description">{{ quiz.description }}</textarea><br>
+    <textarea name="description">{{ quiz.description }}</textarea>
 
     <h2>Questions</h2>
     {% for question in questions %}
-        <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+        <div class="question-card">
             <p><b>{{ question.text }}</b> {% if question.multiple_choice %}(Multiple Choice){% endif %}</p>
+            <p><b>Timer:</b> {{ question.timer }}</p>
             <ul>
                 {% for answer in question.answers.all %}
                     <li>
@@ -43,31 +59,31 @@
                     </li>
                 {% endfor %}
             </ul>
-            <form method="post" style="display:inline;">
-                {% csrf_token %}
-                <input type="hidden" name="delete_question" value="{{ question.id }}">
-                <button type="submit">Delete</button>
-            </form>
+            <button type="submit" name="delete_question" value="{{ question.id }}">Delete</button>
         </div>
     {% empty %}
         <p>No questions yet.</p>
     {% endfor %}
 
     <h2>Add New Question</h2>
-    <input type="text" name="new_question" placeholder="Question text"><br>
+    <input type="text" name="new_question" placeholder="Question text">
 
-    <label>
-        <input type="checkbox" name="multiple_choice"> Multiple Choice
-    </label><br>
+    <label><input type="checkbox" name="multiple_choice"> Multiple Choice</label>
 
     <label>Number of answers (max 5):</label>
-    <input type="number" id="answer_count" name="answer_count" min="1" max="5" onchange="showAnswerFields()"><br>
+    <input type="number" id="answer_count" name="answer_count" min="1" max="5" onchange="showAnswerFields()">
+
+    <label>Timer (15-60):</label>
+    <input type="number" id="timer" name="timer_amount" min="15" max="60">
 
     <div id="answers_container"></div>
 
+    <label>Optional image:</label>
+    <input type="file" name="image" accept="image/*">
+
     <button type="submit">Save Changes</button>
 </form>
-
+<br>
 <a href="{% url 'quizzes' %}">Back to Quizzes</a>
 </body>
 </html>

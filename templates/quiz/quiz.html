@@ -1,78 +1,194 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ quiz.title }}</title>
     <style>
-        .correct { background-color: #c8f7c5; font-weight: bold; border-radius: 3px; padding: 4px; }
-        .wrong { background-color: #f7c5c5; padding: 4px; }
-        .answer-label { display: inline-block; margin-bottom: 6px; border-radius: 3px; padding: 3px 6px; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f7ff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
 
-        /* Quiz flow styles */
+        h1 {
+            margin-top: 20px;
+            color: #4b0082;
+        }
+
+        a {
+            color: #4b0082;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
         .question {
             position: relative;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 60%;
+            margin: 20px auto;
             padding: 20px;
-            margin: 20px 0;
-            background: white;
-            border-radius: 8px;
-            z-index: 1;
-            display: none; /* all hidden at start */
+            display: none;
+            text-align: left;
         }
 
-        .question::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            border-radius: 8px;
-            z-index: 2;
-            transition: opacity 0.6s ease;
+        .question.active {
+            display: block;
         }
 
-        .question.active::before {
-            opacity: 0;
-            pointer-events: none;
+        .question p {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #4b0082;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .answer-label {
+            display: block;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 6px;
+            background: #f0e6ff;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .answer-label:hover {
+            background: #e0d0ff;
+        }
+
+        .correct {
+            background-color: #c8f7c5 !important;
+            font-weight: bold;
+        }
+
+        .wrong {
+            background-color: #f7c5c5 !important;
+        }
+
+        /* Timer bar container */
+        .timer-bar-container {
+            width: 100%;
+            height: 15px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        /* Actual shrinking bar */
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: #4b0082;
+            transition: width 1s linear;
         }
 
         .timer {
             font-weight: bold;
             margin-top: 10px;
+            color: #d97706;
+            text-align: right;
+        }
+
+        button, .btn {
+            background: #4b0082;
+            color: #ffd700;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover, .btn:hover {
+            background: #360060;
         }
 
         #finish-btn {
             display: none;
+            margin-top: 20px;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #4b0082;
+        }
+
+        .footer {
+            margin: 30px;
         }
     </style>
 </head>
 <body>
+{% if questions %}
+    <h1>{{ quiz.title }}</h1>
 
-<h1>{{ quiz.title }}</h1>
-
-<form method="post" id="quiz-form">
+    <form method="post" id="quiz-form">
     {% csrf_token %}
     {% for question in questions %}
         <div class="question" data-timer="{{ question.timer }}">
+            <!-- Timer bar -->
+            <div class="timer-bar-container">
+                <div class="timer-bar"></div>
+            </div>
             <p>{{ question.text }}</p>
-            {% for answer in question.answers.all %}
-                <label class="answer-label
-                    {% if score is not None and answer.is_user_selected and answer.is_correct %} correct{% endif %}
-                    {% if score is not None and answer.is_user_selected and not answer.is_correct %} wrong{% endif %}
-                ">
-                    <input type="radio"
-                           name="question_{{ question.id }}"
-                           value="{{ answer.id }}"
-                           {% if answer.is_user_selected %}checked{% endif %}
-                           {% if score is not None %}disabled{% endif %}>
-                    {{ answer.text }}
-                </label><br>
-            {% endfor %}
+
+            {% if question.image %}
+                <img src="{{ question.image.url }}" alt="Question image">
+            {% endif %}
+
+            {% if question.multiple_choice %}
+                {% for answer in question.answers.all %}
+                    <label class="answer-label
+                        {% if score is not None and answer.is_user_selected and answer.is_correct %} correct{% endif %}
+                        {% if score is not None and answer.is_user_selected and not answer.is_correct %} wrong{% endif %}
+                    ">
+                        <input type="checkbox"
+                               name="question_{{ question.id }}"
+                               value="{{ answer.id }}"
+                               {% if answer.is_user_selected %}checked{% endif %}
+                               {% if score is not None %}disabled{% endif %}>
+                        {{ answer.text }}
+                    </label>
+                {% endfor %}
+            {% else %}
+                {% for answer in question.answers.all %}
+                    <label class="answer-label
+                        {% if score is not None and answer.is_user_selected and answer.is_correct %} correct{% endif %}
+                        {% if score is not None and answer.is_user_selected and not answer.is_correct %} wrong{% endif %}
+                    ">
+                        <input type="radio"
+                               name="question_{{ question.id }}"
+                               value="{{ answer.id }}"
+                               {% if answer.is_user_selected %}checked{% endif %}
+                               {% if score is not None %}disabled{% endif %}>
+                        {{ answer.text }}
+                    </label>
+                {% endfor %}
+            {% endif %}
 
             {% if score is None %}
                 <p class="timer">Time left: <span class="time"></span>s</p>
                 <button type="button" class="next-btn">Next</button>
             {% endif %}
         </div>
-        <hr>
     {% endfor %}
 
     {% if score is None %}
@@ -80,71 +196,128 @@
     {% endif %}
 </form>
 
-{% if score is not None %}
+    {% if score is not None %}
     <h2>Your score: {{ score }} / {{ questions|length }}</h2>
+
+    {% if score == questions|length %}
+        <div id="confetti-container"></div>
+        <script>
+            function createConfettiPiece() {
+                const confetti = document.createElement("div");
+                confetti.classList.add("confetti");
+                confetti.style.left = Math.random() * 100 + "vw";
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + "s"; // 2–5s
+                confetti.style.backgroundColor = ["#FFD700", "#800080", "#FF69B4", "#00CED1", "#32CD32"][Math.floor(Math.random() * 5)];
+                document.getElementById("confetti-container").appendChild(confetti);
+
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+
+            for (let i = 0; i < 150; i++) {
+                setTimeout(createConfettiPiece, i * 50);
+            }
+        </script>
+
+        <style>
+            #confetti-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                overflow: hidden;
+                z-index: 9999;
+            }
+
+            .confetti {
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background-color: yellow;
+                opacity: 0.8;
+                top: -10px;
+                animation: fall linear forwards;
+            }
+
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(720deg);
+                    opacity: 0.9;
+                }
+            }
+        </style>
+    {% endif %}
 
     <form method="get" action="{% url 'quiz' quiz.id %}">
         <button type="submit">Restart</button>
     </form>
 {% endif %}
 
-<a href="{% url 'main_page'%}">Home</a>
+    <div class="footer">
+        <a href="{% url 'quizzes' %}" class="btn">Home</a>
+    </div>
 
-{% if score is None %}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const questions = document.querySelectorAll(".question");
-    let currentIndex = 0;
-    let countdown;
+    {% if score is None %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const questions = document.querySelectorAll(".question");
+        let currentIndex = 0;
+        let countdown;
 
-    function showQuestion(index) {
-        // Hide all
-        questions.forEach(q => {
-            q.style.display = "none";
-            q.classList.remove("active");
-        });
+        function showQuestion(index) {
+            questions.forEach(q => {
+                q.style.display = "none";
+                q.classList.remove("active");
+            });
 
-        // Show current
-        const current = questions[index];
-        current.style.display = "block";
-        current.classList.add("active");
+            const current = questions[index];
+            current.style.display = "block";
+            current.classList.add("active");
 
-        // Timer
-        const timeSpan = current.querySelector(".time");
-        let timeLeft = parseInt(current.dataset.timer);
-        timeSpan.textContent = timeLeft;
-
-        clearInterval(countdown);
-        countdown = setInterval(() => {
-            timeLeft--;
+            const timeSpan = current.querySelector(".time");
+            const bar = current.querySelector(".timer-bar");
+            let timeLeft = parseInt(current.dataset.timer);
+            const totalTime = timeLeft;
             timeSpan.textContent = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                nextQuestion();
-            }
-        }, 1000);
 
-        // Next button
-        const btn = current.querySelector(".next-btn");
-        btn.onclick = nextQuestion;
-    }
+            bar.style.width = "100%";
 
-    function nextQuestion() {
-        questions[currentIndex].classList.remove("active");
-        currentIndex++;
-        if (currentIndex < questions.length) {
-            showQuestion(currentIndex);
-        } else {
-            document.getElementById("finish-btn").style.display = "block";
+            clearInterval(countdown);
+            countdown = setInterval(() => {
+                timeLeft--;
+                timeSpan.textContent = timeLeft;
+                bar.style.width = (timeLeft / totalTime * 100) + "%";
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    nextQuestion();
+                }
+            }, 1000);
+
+            const btn = current.querySelector(".next-btn");
+            btn.onclick = nextQuestion;
         }
-    }
 
-    // Start first question
-    if (questions.length > 0) {
-        showQuestion(currentIndex);
-    }
-});
-</script>
+        function nextQuestion() {
+            questions[currentIndex].classList.remove("active");
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                showQuestion(currentIndex);
+            } else {
+                document.getElementById("finish-btn").style.display = "inline-block";
+            }
+        }
+
+        if (questions.length > 0) {
+            showQuestion(currentIndex);
+        }
+    });
+    </script>
+    {% endif %}
+{% else %}
+<p>No questions in this quiz.</p>
 {% endif %}
 </body>
 </html>
