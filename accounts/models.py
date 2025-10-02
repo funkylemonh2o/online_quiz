@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     ROLE_CHOICES = [
         ('user', 'Користувач'),
-        ('moderator', 'Модератор'),
         ('admin', 'Адміністратор'),
     ]
 

@@ -122,14 +122,8 @@ def edit(request, pk):
     return render(request, "quiz/edit.html", {"quiz": quiz, "questions": questions})
 
 @login_required
-def delete_quiz(request, pk):
-    quiz = get_object_or_404(QuizInfo, pk=pk)
-
-    if quiz.created_by != request.user:
-        return HttpResponseForbidden("You are not allowed to delete this quiz.")
-
-    if request.method == "POST":
+def delete_quiz(request, quiz_id):
+    quiz = get_object_or_404(QuizInfo, id=quiz_id)
+    if quiz.owner == request.user or request.user.is_staff:  # owner or admin
         quiz.delete()
-        return redirect("quizzes")
-
-    return redirect("quizzes")
+    return redirect('quizzes')
